@@ -6,12 +6,16 @@ import { useRouter } from 'next/navigation';
 export default function ChatRedirectPage() {
   const router = useRouter();
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true); // ✅ loading 状态
+  const [loading, setLoading] = useState(true);
+
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   useEffect(() => {
     const goToFirstConversation = async () => {
       try {
-        const res = await fetch('/api/conversation');
+        const res = await fetch(`${baseUrl}/api/conversation`, {
+          credentials: 'include',
+        });
         const data = await res.json();
 
         if (res.status === 401 || !data.conversations) {
@@ -29,12 +33,12 @@ export default function ChatRedirectPage() {
         console.error('获取会话失败:', err);
         setError('网络错误，请稍后重试');
       } finally {
-        setLoading(false); // ✅ 结束 loading
+        setLoading(false);
       }
     };
 
     goToFirstConversation();
-  }, [router]);
+  }, [router, baseUrl]);
 
   return (
     <div className="flex items-center justify-center h-screen text-gray-600 text-lg">

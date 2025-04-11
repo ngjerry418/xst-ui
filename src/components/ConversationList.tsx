@@ -16,22 +16,28 @@ export default function ConversationList() {
   const router = useRouter();
   const pathname = usePathname();
   const activeId = pathname.split('/').pop();
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   // 加载会话列表
   useEffect(() => {
-    fetch('/api/conversation')
+    fetch(`${baseUrl}/api/conversation`, {
+      credentials: 'include',
+    })
       .then((res) => res.json())
       .then((data) => setConversations(data.conversations || []))
       .catch((err) => {
         console.error('获取会话失败:', err);
       });
-  }, []);
+  }, [baseUrl]);
 
   // 新建会话
   const createNew = async () => {
     setCreating(true);
     try {
-      const res = await fetch('/api/conversation', { method: 'POST' });
+      const res = await fetch(`${baseUrl}/api/conversation`, {
+        method: 'POST',
+        credentials: 'include',
+      });
       const data = await res.json();
 
       if (!res.ok || !data.conversationId) {

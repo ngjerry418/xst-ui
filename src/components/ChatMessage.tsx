@@ -8,19 +8,20 @@ type Message = {
 export default function ChatMessage({ message }: { message: Message }) {
   const isUser = message.role === 'user';
 
-  // ✅ 判断是否为图片（支持 http/https 和 base64）
+  // 判断是否为图片链接（支持常见后缀和 base64）
   const isImageLine = (line: string): boolean => {
     const trimmed = line.trim();
     return (
-      /\.(png|jpe?g|gif|webp)$/i.test(trimmed) ||
+      /^https?:\/\/.*\.(png|jpe?g|gif|webp)$/i.test(trimmed) ||
       trimmed.startsWith('data:image/')
     );
   };
 
+  // 将内容按行拆分并清洗
   const lines = message.content
     .split('\n')
     .map((line) => line.trim())
-    .filter((line) => line !== '');
+    .filter(Boolean);
 
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-3`}>

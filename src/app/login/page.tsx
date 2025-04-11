@@ -9,6 +9,8 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const router = useRouter();
 
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
   const handleLogin = async () => {
     setError('');
 
@@ -17,7 +19,7 @@ export default function LoginPage() {
     }
 
     try {
-      const res = await fetch('/api/login', {
+      const res = await fetch(`${baseUrl}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -29,9 +31,9 @@ export default function LoginPage() {
         return setError(data.error || '登录失败');
       }
 
-      await fetch('/api/me', { credentials: 'include' });
+      await fetch(`${baseUrl}/api/me`, { credentials: 'include' });
 
-      const convoRes = await fetch('/api/conversation', {
+      const convoRes = await fetch(`${baseUrl}/api/conversation`, {
         credentials: 'include',
       });
       const convoData = await convoRes.json();

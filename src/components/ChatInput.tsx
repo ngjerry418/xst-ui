@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useRef } from 'react';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+
 export default function ChatInput({
   onSend,
   disabled,
@@ -11,13 +13,13 @@ export default function ChatInput({
 }) {
   const [input, setInput] = useState('');
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [power, setPower] = useState<number | null>(null); // ✅ 当前算力
+  const [power, setPower] = useState<number | null>(null);
   const lastImageTimeRef = useRef<number>(0);
 
   useEffect(() => {
     async function fetchPower() {
       try {
-        const res = await fetch('/api/me', {
+        const res = await fetch(`${API_BASE}/api/me`, {
           credentials: 'include',
         });
         const data = await res.json();
@@ -29,7 +31,6 @@ export default function ChatInput({
 
     fetchPower();
 
-    // ✅ 监听全局刷新算力事件（消息发送后触发）
     const handler = () => fetchPower();
     window.addEventListener('power-updated', handler);
     return () => window.removeEventListener('power-updated', handler);
@@ -39,7 +40,6 @@ export default function ChatInput({
     const content = [input.trim(), previewImage].filter(Boolean).join('\n');
     if (!content) return;
 
-    // ✅ 算力低于或等于 10，弹窗提示
     if (power !== null && power <= 10) {
       alert('亲爱的，我的算力不足了，让我继续陪伴你身边，请尽快为智充值哦。');
     }
@@ -78,7 +78,7 @@ export default function ChatInput({
     formData.append('file', file);
 
     try {
-      const res = await fetch('/api/upload', {
+      const res = await fetch(`${API_BASE}/api/upload`, {
         method: 'POST',
         body: formData,
       });
@@ -104,14 +104,9 @@ export default function ChatInput({
 
   return (
     <div className="flex flex-col w-full px-4 py-3 bg-white border-t border-gray-200 shadow-sm">
-      {/* ✅ 图片预览 */}
       {previewImage && (
         <div className="mb-2 flex items-center justify-between bg-gray-100 p-2 rounded-md border border-gray-300">
-          <img
-            src={previewImage}
-            alt="预览图片"
-            className="w-20 h-20 object-cover rounded"
-          />
+          <img src={previewImage} alt="预览图片" className="w-20 h-20 object-cover rounded" />
           <button
             onClick={() => setPreviewImage(null)}
             className="text-xs text-red-500 hover:underline ml-2"

@@ -5,7 +5,6 @@ import { useParams } from 'next/navigation';
 import ChatMessage from '@/components/ChatMessage';
 import ChatInput from '@/components/ChatInput';
 
-// ✅ 新增类型，用于更新算力
 export type Message = {
   id: string;
   role: 'user' | 'assistant';
@@ -18,6 +17,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   // 自动滚动到底部
   useEffect(() => {
@@ -28,7 +28,9 @@ export default function ChatPage() {
   useEffect(() => {
     async function fetchMessages() {
       try {
-        const res = await fetch(`/api/message/list?conversationId=${conversationId}`);
+        const res = await fetch(`${baseUrl}/api/message/list?conversationId=${conversationId}`, {
+          credentials: 'include',
+        });
         const data = await res.json();
         if (Array.isArray(data.messages)) {
           setMessages(data.messages);
@@ -39,7 +41,7 @@ export default function ChatPage() {
       }
     }
     fetchMessages();
-  }, [conversationId]);
+  }, [conversationId, baseUrl]);
 
   // 发送消息
   const sendMessage = async (content: string) => {
@@ -56,9 +58,10 @@ export default function ChatPage() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/message/send', {
+      const res = await fetch(`${baseUrl}/api/message/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ conversationId, content }),
       });
 
@@ -84,7 +87,6 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
-      {/* 聊天记录区 */}
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 text-gray-800 text-base">
         {messages.length === 0 && !loading && (
           <p className="text-gray-400 text-sm text-center mt-4">暂无对话内容</p>
@@ -107,7 +109,6 @@ export default function ChatPage() {
         <div ref={bottomRef} />
       </div>
 
-      {/* 输入区 */}
       <div className="border-t border-gray-300 bg-white">
         <ChatInput onSend={sendMessage} disabled={loading} />
       </div>

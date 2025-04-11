@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import ConversationList from '@/components/ConversationList';
-import RechargeModal from '@/components/RechargeModal'; // ✅ 引入弹窗组件
+import RechargeModal from '@/components/RechargeModal';
 
 type User = {
   email: string;
@@ -12,11 +12,15 @@ type User = {
 export default function ChatLayout({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showRecharge, setShowRecharge] = useState(false); // ✅ 控制弹窗显示
+  const [showRecharge, setShowRecharge] = useState(false);
+
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   async function fetchUser() {
     try {
-      const res = await fetch('/api/me', { credentials: 'include' });
+      const res = await fetch(`${baseUrl}/api/me`, {
+        credentials: 'include',
+      });
       if (!res.ok) throw new Error('未登录');
       const data = await res.json();
       setUser(data.user);
@@ -53,7 +57,6 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <div className="flex h-screen">
-      {/* 左侧会话栏 */}
       <aside className="w-64 bg-gray-50 border-r border-gray-200 p-4 flex flex-col overflow-y-auto shadow-md">
         <ConversationList />
 
@@ -63,7 +66,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
           <div className="flex items-center justify-between">
             <span>⚡️ 剩余算力：{user.power}</span>
             <button
-              onClick={() => setShowRecharge(true)} // ✅ 打开弹窗
+              onClick={() => setShowRecharge(true)}
               className="text-xs text-blue-500 hover:underline ml-2"
             >
               充值
@@ -72,7 +75,10 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
 
           <button
             onClick={async () => {
-              await fetch('/api/logout', { method: 'POST' });
+              await fetch(`${baseUrl}/api/logout`, {
+                method: 'POST',
+                credentials: 'include',
+              });
               window.location.href = '/login';
             }}
             className="text-sm text-red-500 hover:text-red-600 underline mt-1"
@@ -82,10 +88,8 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
         </div>
       </aside>
 
-      {/* 右侧聊天区域 */}
       <main className="flex-1 bg-white overflow-hidden">{children}</main>
 
-      {/* ✅ 弹出充值弹窗 */}
       {showRecharge && <RechargeModal onClose={() => setShowRecharge(false)} />}
     </div>
   );

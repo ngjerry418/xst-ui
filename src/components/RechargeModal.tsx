@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+
 export default function RechargeModal({ onClose }: { onClose: () => void }) {
   const [selectedAmount, setSelectedAmount] = useState<number>(5);
   const [paymentMethod, setPaymentMethod] = useState<'alipay' | 'wechat'>('alipay');
@@ -10,7 +12,7 @@ export default function RechargeModal({ onClose }: { onClose: () => void }) {
   const handleConfirm = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/pay/prepare', {
+      const res = await fetch(`${API_BASE}/api/pay/prepare`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount: selectedAmount, method: paymentMethod }),

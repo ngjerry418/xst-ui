@@ -1,0 +1,21 @@
+import { getIronSession } from 'iron-session';
+import { cookies } from 'next/headers';
+import { sessionOptions } from './session';
+
+export async function getSessionUser() {
+  const cookieStore = cookies();
+
+  const req = {
+    headers: {
+      get: (key: string) => {
+        if (key === 'cookie') {
+          return cookieStore.toString();
+        }
+        return null;
+      },
+    },
+  };
+
+  const session = await getIronSession(req as any, new Response(), sessionOptions);
+  return session.user; // 自动包含 id、email、power
+}

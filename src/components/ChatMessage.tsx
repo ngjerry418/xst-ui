@@ -8,16 +8,15 @@ type Message = {
 export default function ChatMessage({ message }: { message: Message }) {
   const isUser = message.role === 'user';
 
-  // 判断是否为图片链接（支持常见后缀和 base64）
   const isImageLine = (line: string): boolean => {
     const trimmed = line.trim();
     return (
-      /^https?:\/\/.*\.(png|jpe?g|gif|webp)$/i.test(trimmed) ||
-      trimmed.startsWith('data:image/')
+      /^https?:\/\/.*\.(png|jpe?g|gif|webp)(\?.*)?$/i.test(trimmed) ||
+      trimmed.startsWith('data:image/') ||
+      trimmed.includes('/uploads/')
     );
   };
 
-  // 将内容按行拆分并清洗
   const lines = message.content
     .split('\n')
     .map((line) => line.trim())
@@ -36,7 +35,9 @@ export default function ChatMessage({ message }: { message: Message }) {
               key={idx}
               src={line}
               alt="图片"
-              className="max-w-full max-h-60 my-2 rounded border"
+              onError={(e) => (e.currentTarget.style.display = 'none')}
+              className="max-w-full max-h-60 my-2 rounded border cursor-pointer"
+              onClick={() => window.open(line, '_blank')}
             />
           ) : (
             <div key={idx} className="mb-1 leading-relaxed">

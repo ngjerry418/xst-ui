@@ -10,23 +10,32 @@ export default function RechargeModal({ onClose }: { onClose: () => void }) {
   const [loading, setLoading] = useState(false);
 
   const handleConfirm = async () => {
+    if (!API_BASE) {
+      alert('系统配置错误，请稍后再试');
+      return;
+    }
+
     setLoading(true);
+
     try {
       const res = await fetch(`${API_BASE}/api/pay/prepare`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount: selectedAmount, method: paymentMethod }),
       });
+
       const data = await res.json();
-      if (data?.qrcodeUrl) {
+
+      if (res.ok && data?.qrcodeUrl) {
+        // ✅ 弹出支付二维码页（建议新窗口）
         window.open(data.qrcodeUrl, '_blank');
         onClose();
       } else {
-        alert(data?.error || '请求失败，请稍后重试');
+        alert(data?.error || '支付请求失败，请稍后再试');
       }
     } catch (err) {
-      console.error('支付请求失败:', err);
-      alert('网络错误或服务异常');
+      console.error('❌ 支付接口异常:', err);
+      alert('网络异常或服务器错误');
     } finally {
       setLoading(false);
     }

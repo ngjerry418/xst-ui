@@ -18,6 +18,10 @@ export default function LoginPage() {
       return setError('请输入邮箱和密码');
     }
 
+    if (!baseUrl) {
+      return setError('未配置后端地址');
+    }
+
     try {
       const res = await fetch(`${baseUrl}/api/login`, {
         method: 'POST',
@@ -27,22 +31,24 @@ export default function LoginPage() {
       });
 
       const data = await res.json();
+
       if (!res.ok) {
         return setError(data.error || '登录失败');
       }
 
-      await fetch(`${baseUrl}/api/me`, { credentials: 'include' });
-
+      // 获取会话
       const convoRes = await fetch(`${baseUrl}/api/conversation`, {
         credentials: 'include',
       });
-      const convoData = await convoRes.json();
 
+      const convoData = await convoRes.json();
       const first = convoData.conversations?.[0];
+
       if (first?.id) {
         router.push(`/chat/${first.id}`);
       } else {
-        return setError('未找到会话，请联系管理员');
+        // ✅ 如果没有会话，跳转 chat 主页面
+        router.push('/chat');
       }
     } catch (err) {
       console.error('登录出错:', err);

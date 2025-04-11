@@ -11,6 +11,12 @@ export default function ChatRedirectPage() {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   useEffect(() => {
+    if (!baseUrl) {
+      setError('系统配置错误，请联系管理员');
+      setLoading(false);
+      return;
+    }
+
     const goToFirstConversation = async () => {
       try {
         const res = await fetch(`${baseUrl}/api/conversation`, {

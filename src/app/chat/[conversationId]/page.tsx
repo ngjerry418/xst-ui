@@ -26,26 +26,37 @@ export default function ChatPage() {
 
   // 加载历史消息
   useEffect(() => {
+    if (!baseUrl) {
+      console.error('❌ NEXT_PUBLIC_API_BASE_URL 未设置');
+      return;
+    }
+
     async function fetchMessages() {
       try {
         const res = await fetch(`${baseUrl}/api/message/list?conversationId=${conversationId}`, {
+          method: 'GET',
           credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
         });
+
         const data = await res.json();
         if (Array.isArray(data.messages)) {
           setMessages(data.messages);
+        } else {
+          setMessages([]);
         }
       } catch (err) {
         console.error('加载消息失败:', err);
         setMessages([]);
       }
     }
+
     fetchMessages();
   }, [conversationId, baseUrl]);
 
   // 发送消息
   const sendMessage = async (content: string) => {
-    if (!content.trim()) return;
+    if (!content.trim() || !baseUrl) return;
 
     const userMessage: Message = {
       id: crypto.randomUUID(),
@@ -75,7 +86,6 @@ export default function ChatPage() {
         };
         setMessages((prev) => [...prev, aiReply]);
 
-        // ✅ 通知刷新算力显示
         window.dispatchEvent(new Event('power-updated'));
       }
     } catch (err) {

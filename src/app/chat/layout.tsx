@@ -17,9 +17,16 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   async function fetchUser() {
+    if (!baseUrl) {
+      console.error('❌ NEXT_PUBLIC_API_BASE_URL 未设置');
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch(`${baseUrl}/api/me`, {
         credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
       });
       if (!res.ok) throw new Error('未登录');
       const data = await res.json();
@@ -57,6 +64,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <div className="flex h-screen">
+      {/* 左侧会话栏 */}
       <aside className="w-64 bg-gray-50 border-r border-gray-200 p-4 flex flex-col overflow-y-auto shadow-md">
         <ConversationList />
 
@@ -75,9 +83,11 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
 
           <button
             onClick={async () => {
+              if (!baseUrl) return;
               await fetch(`${baseUrl}/api/logout`, {
                 method: 'POST',
                 credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
               });
               window.location.href = '/login';
             }}
@@ -88,8 +98,10 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
         </div>
       </aside>
 
+      {/* 右侧内容区域 */}
       <main className="flex-1 bg-white overflow-hidden">{children}</main>
 
+      {/* 充值弹窗 */}
       {showRecharge && <RechargeModal onClose={() => setShowRecharge(false)} />}
     </div>
   );

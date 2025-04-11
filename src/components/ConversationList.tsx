@@ -18,16 +18,26 @@ export default function ConversationList() {
   const activeId = pathname.split('/').pop();
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-  // 加载会话列表
-  useEffect(() => {
-    fetch(`${baseUrl}/api/conversation`, {
-      credentials: 'include',
-    })
-      .then((res) => res.json())
-      .then((data) => setConversations(data.conversations || []))
-      .catch((err) => {
-        console.error('获取会话失败:', err);
+  // 加载会话列表函数
+  const loadConversations = async () => {
+    if (!baseUrl) {
+      console.error('环境变量 NEXT_PUBLIC_API_BASE_URL 未定义');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${baseUrl}/api/conversation`, {
+        credentials: 'include',
       });
+      const data = await res.json();
+      setConversations(data.conversations || []);
+    } catch (err) {
+      console.error('获取会话失败:', err);
+    }
+  };
+
+  useEffect(() => {
+    loadConversations();
   }, [baseUrl]);
 
   // 新建会话
@@ -46,6 +56,7 @@ export default function ConversationList() {
       }
 
       router.push(`/chat/${data.conversationId}`);
+      await loadConversations(); // ✅ 创建后刷新列表
     } catch (err) {
       console.error('新建会话失败:', err);
       alert('网络异常，请稍后再试');

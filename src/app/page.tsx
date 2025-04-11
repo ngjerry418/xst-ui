@@ -1,14 +1,13 @@
-// src/app/page.tsx
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace("/chat");
+    router.replace('/chat');
   }, [router]);
 
   return null;

@@ -11,19 +11,29 @@ export default function RegisterPage() {
 
   const handleRegister = async () => {
     setError('');
-    if (!email || !password) return setError('请输入邮箱和密码');
+    if (!email || !password) {
+      return setError('请输入邮箱和密码');
+    }
 
-    const res = await fetch('/api/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const data = await res.json();
-    if (!res.ok) return setError(data.error || '注册失败');
+      const data = await res.json();
 
-    alert('注册成功！请登录');
-    router.push('/login');
+      if (!res.ok) {
+        return setError(data.error || '注册失败');
+      }
+
+      alert('注册成功！已自动登录');
+      router.push('/chat');
+    } catch (err) {
+      console.error('请求出错:', err);
+      setError('网络错误，请稍后再试');
+    }
   };
 
   return (
